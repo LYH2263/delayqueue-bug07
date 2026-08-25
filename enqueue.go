@@ -9,6 +9,9 @@ import (
 )
 
 func (b *Broker) Enqueue(ctx context.Context, id, queue string, payload []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if err := validate.NonEmpty("id", id); err != nil {
 		return fmt.Errorf("%w: %v", ErrInvalid, err)
 	}

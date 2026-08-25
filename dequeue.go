@@ -6,6 +6,9 @@ import (
 )
 
 func (b *Broker) Dequeue(ctx context.Context, workerID string) (*Task, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if workerID == "" {
 		return nil, ErrInvalid
 	}
@@ -14,6 +17,10 @@ func (b *Broker) Dequeue(ctx context.Context, workerID string) (*Task, error) {
 		if b.closed {
 			b.mu.Unlock()
 			return nil, ErrClosed
+		}
+		if err := ctx.Err(); err != nil {
+			b.mu.Unlock()
+			return nil, err
 		}
 		if len(b.pending) == 0 {
 			b.mu.Unlock()
